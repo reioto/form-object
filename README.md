@@ -34,13 +34,11 @@ class FooForm extends \FormObject\Base
 $data = new FooData;
 if ($_POST === array()) {
     //Views Input Form at first
-
     //use your template engine
     $views->context = $data;
     return $views;
 }else {
    //Submitted Form
-
    //pickup and overwrite values
    $data->bind($_POST);
 }
@@ -64,6 +62,7 @@ class FooData extends \FormObject\Data
 {
     public $state = 'input';
     public $name = '';
+    public $hash = '';
 }
 
 //Define State
@@ -84,8 +83,9 @@ class FooConfirm extends \FormObject\StateBase
     protected $name = 'confirm';
     public function execute()
     {
-       //You can use great Validation Libraries
-       $this->getData()->state = $this->getName();
+       //insert CSRF Hash
+       $data = $this->getData();
+       $data->state = $this->getName();
        return ;
     }
 }
@@ -95,6 +95,7 @@ class FooFinish extends \FormObject\StateBase
     protected $name = 'finish';
     public function execute()
     {
+       //check CSRF
        //register data
        //send mail
        //logging
