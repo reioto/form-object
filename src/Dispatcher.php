@@ -11,35 +11,41 @@ class Dispatcher
         $this->setState($state);
     }
 
-    private function setState(State $state)
+    /**
+     * @param string|State
+     */
+    protected function setState($state)
     {
-        $this->state = $state;
-        $this->dispatch();
+        if (is_string($state) && class_exists($state)) {
+            $newClass = new \ReflectionClass($state);
+            if ($newClass->isSubclassOf(__NAMESPACE__ . '\\StateBase')) {
+                $data = $this->getState()->getData();
+                $state = $newClass->newInstance($data);
+            }else {
+                throw new \DomainException("invalid inherits");
+            }
+        }
+
+        if ($state instanceof State) {
+            $this->state = $state;
+            return;
+        }
+
+        throw new \DomainException();
     }
 
     public function getState() { return $this->state; }
 
-    protected function dispatch()
+    public function dispatch()
     {
         $current = $this->getState();
         $next = $current->execute();
 
         if (empty($next)) {
             return $current;
-        } elseif (is_string($next) && class_exists($next)) {
-            $newClass = new \ReflectionClass($next);
-            if ($newClass->isSubclassOf(__NAMESPACE__ . '\\StateBase')) {
-                $next = $newClass->newInstance($current->getData());
-            }else {
-                throw new \DomainException("invalid inherits");
-            }
         }
 
-        if ($next instanceof State) {
-            $this->setState($next);
-            return;
-        }
-
-        throw new \DomainException();
+        $this->setState($next);
+        return $this->dispatch();
     }
 }

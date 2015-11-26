@@ -113,7 +113,7 @@ switch ($data->state) {
 
    //automatic switch state
    $dispatcher = new FormObject\Dispatcher($form);
-   $form = $dispatcher->getState();
+   $form = $dispatcher->dispatch();
    break;
 
    case 'confirm':

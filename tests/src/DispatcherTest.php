@@ -59,9 +59,10 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase
         $data = new SampleData;
         $state = new Init($data);
         $instance = new Dispatcher($state);
+        $lastState = $instance->dispatch();
 
         $this->assertInstanceOf(
-            __NAMESPACE__ . '\\Second', $instance->getState()
+            __NAMESPACE__ . '\\Second', $lastState
         );
 
         $ext = array('Init', 'First', 'Second');
@@ -69,7 +70,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase
             return __NAMESPACE__ . '\\' . $row;
         }, $ext);
         
-        $data = $instance->getState()->getData();
+        $data = $lastState->getData();
         $this->assertEquals($ext, $data->history);
     }
 
@@ -88,6 +89,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase
                  return 'FormObject\\Data';
              }));
         $instance = new Dispatcher($mock);
+        $instance->dispatch();
 
         $this->fail();
     }
@@ -108,12 +110,13 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase
                  return new Second($data);
              }));
         $instance = new Dispatcher($mock);
+        $lastState = $instance->dispatch();
 
         $ext = array('test', __NAMESPACE__ . '\\Second');
 
-        $this->assertInstanceOf(end($ext), $instance->getState());
+        $this->assertInstanceOf(end($ext), $lastState);
 
-        $result = $instance->getState()->getData();
+        $result = $lastState->getData();
         $this->assertSame($data, $result);
         $history = $result->history;
         $this->assertEquals($ext, $history);
@@ -134,6 +137,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase
                  return $data;
              }));
         $instance = new Dispatcher($mock);
+        $instance->dispatch();
 
         $this->fail();
     }
@@ -166,6 +170,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase
                  return $ret;
              }));
         $instance = new Dispatcher($mock);
+        $instance->dispatch();
 
         $this->fail();
     }
