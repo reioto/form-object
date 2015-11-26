@@ -1,0 +1,25 @@
+{
+    "name": "form/form-object",
+    "description": "Web Form Framework",
+    "keywords": [
+	"form", "OOP"
+    ],
+    "type": "library",
+    "license": "BSD-3-Clause",
+    "require": {
+        "php": ">=5.3.3"
+    },
+    "require-dev": {
+        "phpunit/phpunit": ">=3.7.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "FormObject\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/src/"
+        }
+    }
+}
