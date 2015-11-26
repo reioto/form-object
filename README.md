@@ -60,7 +60,7 @@ State Pattern?
 //Define Data
 class FooData extends \FormObject\Data
 {
-    public $state = 'input';
+    public $state = 'init';
     public $name = '';
     public $hash = '';
 }
@@ -72,8 +72,10 @@ class FooValidate extends \FormObject\StateBase
     public function execute()
     {
        //You can use great Validation Libraries
-       //Next State Class String Or Instance
+       
        $this->getData()->state = $this->getName();
+
+       //Next State Class String or Instance
        return 'FooConfirm';
     }
 }
