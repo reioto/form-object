@@ -3,7 +3,7 @@ namespace FormObject;
 
 use FormObject\StateBase as State;
 
-class Dispatcher
+class Dispatcher implements IDispatcher
 {
     private $state;
     function __construct(State $state)
