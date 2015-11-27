@@ -4,6 +4,7 @@ namespace Tests;
 use FormObject\Data;
 use FormObject\StateBase;
 use FormObject\Dispatcher;
+use Prophecy\Argument;
 
 class SampleData extends Data
 {
@@ -165,5 +166,43 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase
         $instance->dispatch();
 
         $this->fail();
+    }
+
+    /**
+     * @group Dispatcher
+     */
+    function testSetFactory()
+    {
+        $data = $this->prophesize('FormObject\\Data')->reveal();
+        $second_state = $this->prophesize('FormObject\\StateBase');
+        $second_state->getData()
+                     ->willReturn($data);
+        $second_state->execute()
+                     ->willReturn(null);
+        $second_state = $second_state->reveal();
+
+        $state = $this->prophesize('FormObject\\StateBase');
+        $state->getData()
+              ->willReturn($data);
+        $state->execute()
+              ->willReturn($second_state);
+        $state = $state->reveal();
+
+        $factory_state = $this->prophesize('FormObject\\StateBase');
+        $factory_state->getData()
+                      ->willReturn($data);
+        $factory_state->execute()
+                      ->willReturn(null);
+        $factory_state = $factory_state->reveal();
+
+        $factory = $this->prophesize('FormObject\\Dispatcher\\IStateFactory');
+        $factory->isAccept(Argument::any())->willReturn(true);
+        $factory->factory($state, Argument::any())->willReturn($factory_state);
+
+        $instance = new Dispatcher($state);
+        $instance->setStateFactory($factory->reveal());
+        $result = $instance->dispatch();
+
+        $this->assertSame($factory_state, $result);
     }
 }

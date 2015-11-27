@@ -2,6 +2,8 @@
 namespace FormObject;
 
 use FormObject\StateBase as State;
+use FormObject\Dispatcher\IStateFactory;
+use FormObject\Dispatcher\StateFactory;
 
 class Dispatcher implements IDispatcher
 {
@@ -12,29 +14,39 @@ class Dispatcher implements IDispatcher
     }
 
     /**
-     * @param string|State
+     * @param State $state
      */
-    protected function setState($state)
+    protected function setState(State $state)
     {
-        if (is_string($state) && class_exists($state)) {
-            $newClass = new \ReflectionClass($state);
-            if ($newClass->isSubclassOf(__NAMESPACE__ . '\\StateBase')) {
-                $data = $this->getState()->getData();
-                $state = $newClass->newInstance($data);
-            }else {
-                throw new \DomainException("invalid inherits");
-            }
-        }
-
-        if ($state instanceof State) {
-            $this->state = $state;
-            return;
-        }
-
-        throw new \DomainException();
+        $this->state = $state;
     }
 
     public function getState() { return $this->state; }
+
+
+    private $_stateFactory = array();
+
+    /**
+     * @param IStateFactory $factory
+     * @return $this
+     */
+    public function setStateFactory(IStateFactory $factory)
+    {
+        $this->_stateFactory = array($factory);
+        return $this;
+    }
+
+    protected function factoryState($newState)
+    {
+        foreach ($this->_stateFactory as $factory) {
+            if ($factory->isAccept($newState)) {
+                return $factory->factory($this->getState(), $newState);
+            }
+        }
+
+        $factory = new StateFactory($this->getState()->getData());
+        return $factory->factory(null, $newState);
+    }
 
     public function dispatch()
     {
@@ -45,6 +57,7 @@ class Dispatcher implements IDispatcher
             return $current;
         }
 
+        $next = $this->factoryState($next);
         $this->setState($next);
         return $this->dispatch();
     }
