@@ -12,8 +12,9 @@ interface IStateFactory
     public function isAccept($state);
 
     /**
-     * @param string|\FormObject\StateBase $nextState
+     * @param null|\FormObject\StateBase $currentState
+     * @param string|\FormObject\StateBase $newState
      * @return \FormObject\StateBase
      */
-    public function factory($nextState);
+    public function factory($currentState, $newState);
 }
