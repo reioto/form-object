@@ -114,7 +114,7 @@ switch ($data->state) {
    $form = new FooValidate($data);
 
    //automatic switch state
-   $dispatcher = new FormObject\Dispatcher($form);
+   $dispatcher = new \FormObject\Dispatcher($form);
    $form = $dispatcher->dispatch();
    break;
 
@@ -123,6 +123,10 @@ switch ($data->state) {
    $form->execute();
    redirect('form/finish.html');
    break;
+
+   default:
+   $view->context = $data;
+   return $view;
 }
 
 $view->context = $form->getData();
