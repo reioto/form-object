@@ -75,20 +75,18 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException DomainException
+     * @expectedException InvalidArgumentException
      * @group Dispatcher
      */
     function testDispatch_string_not_state()
     {
-        $data = new SampleData;
-        $mock = $this->getMockBuilder('FormObject\\StateBase')
-                     ->setConstructorArgs(array($data))
-                     ->getMock();
-        $mock->method('execute')
-             ->will($this->returnCallback(function() {
-                 return 'FormObject\\Data';
-             }));
-        $instance = new Dispatcher($mock);
+        $data = $this->prophesize('FormObject\\Data')
+                     ->reveal();
+        $mock = $this->prophesize('FormObject\\StateBase');
+        $mock->execute()->willReturn('FormObject\\Data');
+        $mock->getData()->willReturn($data);
+
+        $instance = new Dispatcher($mock->reveal());
         $instance->dispatch();
 
         $this->fail();
@@ -100,16 +98,14 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase
     function testDispatch_state_object()
     {
         $data = new SampleData;
-        $mock = $this->getMockBuilder('FormObject\\StateBase')
-                     ->setConstructorArgs(array($data))
-                     ->setMockClassName('ObFirst')
-                     ->getMock();
-        $mock->method('execute')
-             ->will($this->returnCallback(function() use ($data) {
+        $mock = $this->prophesize('FormObject\\StateBase');
+        $mock->getData()->willReturn($data);
+        $mock->execute()
+             ->will(function() use ($data) {
                  $data->history[] = 'test';
                  return new Second($data);
-             }));
-        $instance = new Dispatcher($mock);
+             });
+        $instance = new Dispatcher($mock->reveal());
         $lastState = $instance->dispatch();
 
         $ext = array('test', __NAMESPACE__ . '\\Second');
@@ -123,20 +119,18 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException DomainException
+     * @expectedException InvalidArgumentException
      * @group Dispatcher
      */
     function testDispatch_not_state()
     {
-        $data = new SampleData;
-        $mock = $this->getMockBuilder('FormObject\\StateBase')
-                     ->setConstructorArgs(array($data))
-                     ->getMock();
-        $mock->method('execute')
-             ->will($this->returnCallback(function() use ($data) {
-                 return $data;
-             }));
-        $instance = new Dispatcher($mock);
+        $data = $this->prophesize('FormObject\\Data')
+                     ->reveal();
+        $mock = $this->prophesize('FormObject\\StateBase');
+        $mock->getData()->willReturn($data);
+        $mock->execute()
+             ->willReturn($data);
+        $instance = new Dispatcher($mock->reveal());
         $instance->dispatch();
 
         $this->fail();
@@ -155,21 +149,19 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider dataProvider_testDispatch_return_value
-     * @expectedException DomainException
+     * @expectedException InvalidArgumentException
      * @group Dispatcher
      */
     function testDispatch_return_value($ret)
     {
-        $data = $this->getMockBuilder('FormObject\\Data')
-                     ->getMock();
-        $mock = $this->getMockBuilder('FormObject\\StateBase')
-                     ->setConstructorArgs(array($data))
-                     ->getMock();
-        $mock->method('execute')
-             ->will($this->returnCallback(function() use ($ret) {
-                 return $ret;
-             }));
-        $instance = new Dispatcher($mock);
+        $data = $this->prophesize('FormObject\\Data')
+                     ->reveal();
+        $mock = $this->prophesize('FormObject\\StateBase');
+        $mock->getData()
+             ->willReturn($data);
+        $mock->execute()
+             ->willReturn($ret);
+        $instance = new Dispatcher($mock->reveal());
         $instance->dispatch();
 
         $this->fail();
