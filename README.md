@@ -1,4 +1,5 @@
 # form-object
+[![Build Status](https://travis-ci.org/reioto/form-object.svg?branch=master)](https://travis-ci.org/reioto/form-object)
 
 FormObject is freely form library
 
