@@ -1,11 +1,11 @@
-<phpunit bootstrap="./Bootstrap.php"
+<phpunit bootstrap="tests/Bootstrap.php"
          colors="true" >
     <php>
         <ini name="display_errors" value="1" />
      </php>
     <testsuites>
         <testsuite name="library">
-            <directory>./src</directory>
+            <directory suffix=".php">tests/src</directory>
         </testsuite>
     </testsuites>
 </phpunit>
